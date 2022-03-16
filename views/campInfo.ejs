@@ -1,0 +1,19 @@
+<% layout("layouts/boilerplate.ejs")%>
+
+<div class="container d-flex justify-content-center align-items-center">
+	<div class="card mb-5" style="width: 60%;">
+	  <img src="<%= data.image %>" class="card-img-top" alt="<%= data.desc %>">
+	  <div class="card-body">
+	    <h5 class="card-title"><%= data.title %></h5>
+	    <p class="card-text"><%= data.desc %></p>
+	    <p class="card-text">$<%= data.price %></p>
+	    <p class="card-text text-muted"><%= data.location %></p>
+	    <div class="d-flex">
+		    <a href="/campgrounds/<%= data._id %>/edit" class="btn btn-success" style="background: #00C897; border:0">Edit Campground</a>
+		    <form action="/campgrounds/<%= data._id %>?_method=DELETE" method="POST">
+		    	<button class="btn btn-danger mx-2">Delete Campground</button>
+		    </form>
+		</div>
+	  </div>
+	</div>
+</div>
