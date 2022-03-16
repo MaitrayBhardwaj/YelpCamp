@@ -15,6 +15,13 @@ mongoose.connect('mongodb://localhost:27017/YelpCamp')
 
 const app = express()
 
+const wrapAsync = (func) => {
+	return function(req, res, next){
+		func(req, res, next)
+			.catch(err => next(err))
+	}
+}
+
 app.use(methodOverride('_method'))
 app.use(express.static(path.join(__dirname, '/public')))
 app.use(express.urlencoded({ extended: true }))
@@ -27,68 +34,45 @@ app.get('/', (req, res) => {
 	res.send('Working!')
 })
 
-app.get('/campgrounds', (req, res) => {
-	Campground.find({})
-		.then(data => {
-			res.render('allCamp', { data })
-		})
-})
+app.get('/campgrounds', wrapAsync(async (req, res) => {
+	const data = await Campground.find({})
+	res.render('allCamp', { data })
+}))
 
 app.get('/campgrounds/new', (req, res) => {
 	res.render('addCamp')
 })
 
-app.get('/campgrounds/:id', (req, res) => {
+app.get('/campgrounds/:id', wrapAsync(async (req, res) => {
 	const id = req.params.id
-	Campground.findById(id)
-		.then(data => {
-			res.render('campInfo', { data })
-		})
-		.catch(err => {
-			console.log(err)
-		})
-})
+	const data = await Campground.findById(id)
+	res.render('campInfo', { data })
+}))
 
-app.get('/campgrounds/:id/edit', (req, res) => {
+app.get('/campgrounds/:id/edit', wrapAsync(async (req, res) => {
 	const id = req.params.id
-	Campground.findById(id)
-		.then(data => {
-			res.render('editCamp', { data })
-		})
-		.catch(err => {
-			res.send(err)
-		})
-})
+	const data = await Campground.findById(id)
+	res.render('editCamp', { data })
+}))
 
-app.post('/campgrounds', (req, res) => {
+app.post('/campgrounds', wrapAsync(async (req, res) => {
 	const newCamp = new Campground(req.body)
-	newCamp.save()
-		.then(data => {
-			res.redirect(`/campgrounds/${newCamp._id}`)
-		})
-		.catch(err => {
-			console.log(err)
-		})
-})
+	await newCamp.save()
+	res.redirect(`/campgrounds/${newCamp._id}`)
+}))
 
-app.patch('/campgrounds/:id', (req, res) => {
-	Campground.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
-		.then(data => {
-			res.redirect(`/campgrounds/${data._id}`)
-		})
-		.catch(err => {
-			res.send(err)
-		})
-})
+app.patch('/campgrounds/:id', wrapAsync(async (req, res) => {
+	await Campground.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+	res.redirect(`/campgrounds/${data._id}`)
+}))
 
-app.delete('/campgrounds/:id', (req, res) => {
-	Campground.findByIdAndDelete(req.params.id)
-		.then(() => {
-			res.redirect('/campgrounds')
-		})
-		.catch(err => {
-			res.send(err)
-		})
+app.delete('/campgrounds/:id', wrapAsync(async (req, res) => {
+	await Campground.findByIdAndDelete(req.params.id)
+	res.redirect('/campgrounds')
+}))
+
+app.use((err, req, res, next) => {
+	res.send(`Error: ${err.name}`)
 })
 
 app.listen(3000, () => {
