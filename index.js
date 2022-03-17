@@ -6,6 +6,7 @@ const ejsMate = require('ejs-mate')
 const Campground = require('./models/campgrounds')
 const wrapAsync = require('./utils/wrapAsync')
 const expressError = require('./utils/expressError')
+const validateCampground = require('./utils/validateCampground')
 
 mongoose.connect('mongodb://localhost:27017/YelpCamp')
 	.then(res => {
@@ -50,14 +51,13 @@ app.get('/campgrounds/:id/edit', wrapAsync(async (req, res) => {
 	res.render('editCamp', { data })
 }))
 
-app.post('/campgrounds', wrapAsync(async (req, res) => {
+app.post('/campgrounds', validateCampground, wrapAsync(async (req, res) => {
 	const newCamp = new Campground(req.body)
-	if(!newCamp) throw new expressError('Invalid Campground Data', 400)
 	await newCamp.save()
 	res.redirect(`/campgrounds/${newCamp._id}`)
 }))
 
-app.patch('/campgrounds/:id', wrapAsync(async (req, res) => {
+app.patch('/campgrounds/:id', validateCampground, wrapAsync(async (req, res) => {
 	await Campground.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
 	res.redirect(`/campgrounds/${req.params.id}`)
 }))

@@ -15,7 +15,8 @@ const cmpSchema = new mongoose.Schema({
 	desc: {
 		type: String,
 		maxLength: 200,
-		minLength: 10
+		minLength: 10,
+		required: true
 	},
 	location: {
 		type: String,
