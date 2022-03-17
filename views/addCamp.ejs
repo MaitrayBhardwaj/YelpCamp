@@ -1,12 +1,21 @@
 <% layout("layouts/boilerplate.ejs")%>
-<h1>Add a Campground</h1>
-<form action="/campgrounds" method="POST"class="d-flex flex-column justify-content-evenly" method="POST">
-	<input class="mt-3 p-2" type="text" name="title" placeholder="Campground Name">
-	<input class="mt-3 p-2" type="text" name="price" placeholder="Campground Price">
-	<input class="mt-3 p-2" type="text" name="desc" placeholder="Campground Description">
-	<input class="mt-3 p-2" type="text" name="location" placeholder="Campground Location">
-	<div class="d-flex mt-3">
-		<button class="btn btn-success">Submit</button>
-		<a href="/campgrounds/" class="btn btn-primary mx-3">Cancel</a>
+<div class="d-flex justify-content-center align-items-center">
+	<div class="d-flex flex-column border p-5 mb-5" style="width: 50%;">
+		<h1 class="align-self-center">Add a Campground</h1>
+		<form action="/campgrounds" class="d-flex flex-column justify-content-evenly needs-validation" method="POST" novalidate>
+			<input class="form-control mt-3 p-2" type="text" name="title" placeholder="Campground Name" required>
+			<div class="input-group mt-3">
+			  <span class="input-group-text">$</span>
+			  <input type="number" class="form-control" name="price" required>
+			</div>
+			<input class="form-control mt-3 p-2" type="text" name="desc" placeholder="Campground Description" required>
+			<input class="form-control mt-3 p-2" type="text" name="location" placeholder="Campground Location" required>
+			<div class="d-flex mt-3">
+				<button class="btn btn-success">Submit</button>
+				<a href="/campgrounds/" class="btn btn-primary mx-3">Cancel</a>
+			</div>
+		</form>
 	</div>
-</form>
+</div>
+
+<script src="/js/validation.js"></script>

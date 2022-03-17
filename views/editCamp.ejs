@@ -1,12 +1,21 @@
 <% layout("layouts/boilerplate.ejs")%>
-<h1>Update Campground</h1>
-<form action="/campgrounds/<%= data._id %>?_method=PATCH" class="d-flex flex-column justify-content-evenly" method="POST">
-	<input class="mt-3 p-2" type="text" name="title" placeholder="Campground Name" value="<%= data.title %>">
-	<input class="mt-3 p-2" type="text" name="price" placeholder="Campground Price" value="<%= data.price %>">
-	<input class="mt-3 p-2" type="text" name="desc" placeholder="Campground Description" value="<%= data.desc %>">
-	<input class="mt-3 p-2" type="text" name="location" placeholder="Campground Location" value="<%= data.location %>">
-	<div class="d-flex mt-3">
-		<button class="btn btn-success">Update</button>
-		<a href="/campgrounds/<%= data._id %>" class="btn btn-primary mx-3">Cancel</a>
+<div class="d-flex align-items-center justify-content-center">
+	<div class="p-5 border mb-5 d-flex flex-column" style="width: 50%">
+		<h1 class="mb-4 align-self-center">Update Campground</h1>
+		<form action="/campgrounds/<%= data._id %>?_method=PATCH" class="d-flex flex-column justify-content-evenly needs-validation" method="POST" novalidate>
+			<input class="form-control mt-3 p-2" type="text" name="title" placeholder="Campground Name" value="<%= data.title %>">
+			<div class="input-group mt-3">
+			  <span class="input-group-text">$</span>
+			  <input type="number" class="form-control" name="price" value="<%= data.price %>">
+			</div>
+			<input class="form-control mt-3 p-2" type="text" name="desc" placeholder="Campground Description" value="<%= data.desc %>">
+			<input class="form-control mt-3 p-2" type="text" name="location" placeholder="Campground Location" value="<%= data.location %>">
+			<div class="d-flex mt-3">
+				<button class="btn btn-success">Update</button>
+				<a href="/campgrounds/<%= data._id %>" class="btn btn-primary mx-3">Cancel</a>
+			</div>
+		</form>
 	</div>
-</form>
+</div>
+
+<script src="/js/validation.js"></script>

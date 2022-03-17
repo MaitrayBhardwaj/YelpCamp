@@ -4,6 +4,8 @@ const path = require('path')
 const methodOverride = require('method-override')
 const ejsMate = require('ejs-mate')
 const Campground = require('./models/campgrounds')
+const wrapAsync = require('./utils/wrapAsync')
+const expressError = require('./utils/expressError')
 
 mongoose.connect('mongodb://localhost:27017/YelpCamp')
 	.then(res => {
@@ -14,13 +16,6 @@ mongoose.connect('mongodb://localhost:27017/YelpCamp')
 	});
 
 const app = express()
-
-const wrapAsync = (func) => {
-	return function(req, res, next){
-		func(req, res, next)
-			.catch(err => next(err))
-	}
-}
 
 app.use(methodOverride('_method'))
 app.use(express.static(path.join(__dirname, '/public')))
@@ -57,13 +52,14 @@ app.get('/campgrounds/:id/edit', wrapAsync(async (req, res) => {
 
 app.post('/campgrounds', wrapAsync(async (req, res) => {
 	const newCamp = new Campground(req.body)
+	if(!newCamp) throw new expressError('Invalid Campground Data', 400)
 	await newCamp.save()
 	res.redirect(`/campgrounds/${newCamp._id}`)
 }))
 
 app.patch('/campgrounds/:id', wrapAsync(async (req, res) => {
 	await Campground.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
-	res.redirect(`/campgrounds/${data._id}`)
+	res.redirect(`/campgrounds/${req.params.id}`)
 }))
 
 app.delete('/campgrounds/:id', wrapAsync(async (req, res) => {
@@ -71,8 +67,13 @@ app.delete('/campgrounds/:id', wrapAsync(async (req, res) => {
 	res.redirect('/campgrounds')
 }))
 
+app.all('*', (req, res, next) => {
+	next(new expressError('Not found', 404))
+})
+
 app.use((err, req, res, next) => {
-	res.send(`Error: ${err.name}`)
+	res.status(err.status)
+	res.render('error', { err })
 })
 
 app.listen(3000, () => {
