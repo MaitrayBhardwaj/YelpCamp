@@ -1,7 +1,7 @@
 <% layout("layouts/boilerplate.ejs")%>
 
-<div class="container d-flex justify-content-center align-items-center">
-	<div class="card mb-5" style="width: 60%;">
+<div class="container d-flex justify-content-center align-items-start">
+	<div class="card mb-5 flex-grow-1" style="width: 60%;">
 	  <img src="<%= data.image %>" class="card-img-top" alt="<%= data.desc %>">
 	  <div class="card-body">
 	    <h5 class="card-title"><%= data.title %></h5>
@@ -9,11 +9,53 @@
 	    <p class="card-text">$<%= data.price %></p>
 	    <p class="card-text text-muted"><%= data.location %></p>
 	    <div class="d-flex">
-		    <a href="/campgrounds/<%= data._id %>/edit" class="btn btn-success" style="background: #00C897; border:0">Edit Campground</a>
+	    	<a href="/campgrounds/<%= data._id %>/reviews" class="btn btn-sm btn-warning">Reviews</a>
+		    <a href="/campgrounds/<%= data._id %>/edit" class="btn btn-sm btn-success mx-3">Edit Campground</a>
 		    <form action="/campgrounds/<%= data._id %>?_method=DELETE" method="POST">
-		    	<button class="btn btn-danger mx-2">Delete Campground</button>
+		    	<button class="btn btn-sm btn-danger">Delete Campground</button>
 		    </form>
 		</div>
 	  </div>
 	</div>
+	<div class="d-flex flex-column mx-3 align-self-start flex-grow-1 px-2 mx-0" style="max-width: 40%">
+		<h3 class="mb-3">Submit a Review</h3>
+		<form action="/campgrounds/<%= data._id %>" class="needs-validation" method='POST' novalidate>
+			<div class="d-flex flex-column">
+				<div class="mb-3">
+				  <textarea class="form-control" name="review" rows="3" required></textarea>
+				</div>
+				<div class="mb-3  align-self-center" style="width:100%">
+				  <input type="number" max='5' min='1' class="form-control" name="rating" placeholder="Rating" required>
+				</div>
+			</div>
+			<button class="mb-3 btn btn-sm btn-primary">Submit</button>
+		</form>
+		<h3 class="border-bottom pb-2 mb-4">Reviews</h3>
+		<% if(data.reviews.length === 0) { %>
+		<div class="alert alert-secondary text-center my-2 p-1" role="alert">
+		  No reviews yet.
+		</div>
+		<% } else { %>
+		<% for(let review of data.reviews) { %>
+		<div class="card mb-3" style="max-width: 100%;">
+		  <div class="row g-0">
+		      <div class="card-body px-3">
+		        <h5 class="card-title">
+		        	<% for(let i = 0; i < review.rating; i++) { %>
+		          	&#9733; 
+		          	<% } %>
+		        </h5>
+		        <p class="card-text"><%= review.review %></p>
+		        <div class="d-flex">
+		          <form action="/campgrounds/<%= review.parentCamp._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
+		            <button class="btn btn-sm btn-danger">Delete Review</button>
+		          </form>
+		        </div>
+		      </div>
+		  </div>
+		</div>
+		<% } } %>
+	</div>
 </div>
+
+<script src="/js/validation.js"></script>

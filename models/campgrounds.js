@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const Review = require('./reviews')
 
 const cmpSchema = new mongoose.Schema({
 	title: {
@@ -26,6 +27,16 @@ const cmpSchema = new mongoose.Schema({
 	image: {
 		type: String,
 		default: 'https://source.unsplash.com/collection/483251/800x500'
+	},
+	reviews: [{
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Review'
+	}]
+})
+
+cmpSchema.post('findOneAndDelete', async (data) => {
+	for(let review of data.reviews){
+		await Review.findByIdAndDelete(review._id)
 	}
 })
 
