@@ -3,6 +3,8 @@ const mongoose = require('mongoose')
 const path = require('path')
 const methodOverride = require('method-override')
 const ejsMate = require('ejs-mate')
+const session = require('express-session')
+const flash = require('connect-flash')
 
 const Campground = require('./models/campgrounds')
 const Review = require('./models/reviews')
@@ -25,6 +27,24 @@ const app = express()
 app.use(methodOverride('_method'))
 app.use(express.static(path.join(__dirname, '/public')))
 app.use(express.urlencoded({ extended: true }))
+app.use(session({
+	secret: "chembiostry",
+	resave: false,
+	saveUninitialized: true,
+	cookie: {
+		httpOnly: true,
+		expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+		maxAge: 1000 * 60 * 60 * 24 * 7
+	}
+}))
+app.use(flash())
+app.use((req, res, next) => {
+	res.locals.success = req.flash('success')
+	res.locals.error = req.flash('error')
+	res.locals.warning = req.flash('warning')
+	res.locals.info = req.flash('info')
+	next()
+})
 
 app.engine('ejs', ejsMate)
 app.set('views', path.join(__dirname, '/views'))
@@ -49,7 +69,13 @@ app.get('/campgrounds/:id', wrapAsync(async (req, res, next) => {
 		path: 'reviews',
 		options: { limit: 5 }
 	})
-	res.render('campInfo', { data })
+	if(!data){
+		req.flash('error', "Couldn't find the campground you are looking for :(")
+		res.redirect('/campgrounds')
+	}
+	else{
+		res.render('campInfo', { data })
+	}
 }))
 
 app.get('/campgrounds/:id/edit', wrapAsync(async (req, res, next) => {
@@ -61,6 +87,7 @@ app.get('/campgrounds/:id/edit', wrapAsync(async (req, res, next) => {
 app.post('/campgrounds', validateCampground, wrapAsync(async (req, res, next) => {
 	const newCamp = new Campground(req.body)
 	await newCamp.save()
+	req.flash('success', 'Campground added successfully!')
 	res.redirect(`/campgrounds/${newCamp._id}`)
 }))
 
@@ -71,6 +98,7 @@ app.post('/campgrounds/:id', validateReview, wrapAsync(async (req, res, next) =>
 	await newReview.save()
 	campground.reviews.push(newReview)
 	await campground.save()
+	req.flash('success', 'Review added successfully!')
 	res.redirect(`/campgrounds/${campground._id}`)
 }))
 
@@ -82,16 +110,19 @@ app.get('/campgrounds/:id/reviews', wrapAsync(async (req, res, next) => {
 
 app.patch('/campgrounds/:id', validateCampground, wrapAsync(async (req, res, next) => {
 	await Campground.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+	req.flash('success', 'Campground updated successfully!')
 	res.redirect(`/campgrounds/${req.params.id}`)
 }))
 
 app.delete('/campgrounds/:id', wrapAsync(async (req, res, next) => {
 	await Campground.findByIdAndDelete(req.params.id)
+	req.flash('success', 'Campground deleted successfully!')
 	res.redirect('/campgrounds')
 }))
 
 app.delete('/campgrounds/:campId/reviews/:id', wrapAsync(async (req, res, next) => {
 	await Review.findByIdAndDelete(req.params.id)
+	req.flash('success', 'Review deleted successfully!')
 	res.redirect(`/campgrounds/${req.params.campId}`)
 }))
 
