@@ -1,0 +1,13 @@
+<% layout('layouts/boilerplate.ejs') %>
+
+<div class="container d-flex justify-content-center align-items-center flex-column">
+	<h1 class="mb-5">Sign Up to YelpCamp!</h1>
+	<form class="needs-validation d-flex flex-column" action="/signup" method="POST" style="width: 60%" novalidate>
+		<input type="text" placeholder="Username" class="form-control my-1" name="username" required>
+		<input type="email" placeholder="Email" class="form-control my-1" name="email" required>
+		<input type="password" name="password" placeholder="Password" class="form-control my-1" required>
+		<button class="btn btn-success align-self-center my-1">Sign Up</button>
+	</form>
+</div>
+
+<script src="/js/validation.js"></script>
