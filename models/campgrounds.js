@@ -15,7 +15,7 @@ const cmpSchema = new mongoose.Schema({
 	},
 	desc: {
 		type: String,
-		maxLength: 200,
+		maxLength: 1000,
 		minLength: 10,
 		required: true
 	},
@@ -31,7 +31,11 @@ const cmpSchema = new mongoose.Schema({
 	reviews: [{
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'Review'
-	}]
+	}],
+	author: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'User'
+	}
 })
 
 cmpSchema.post('findOneAndDelete', async (data) => {

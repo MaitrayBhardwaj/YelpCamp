@@ -5,15 +5,15 @@
 <div class="card mb-3" style="max-width: 100%;">
   <div class="row g-0">
     <div class="col-md-4">
-      <img src="<%= camp.image %>" class="img-fluid rounded-start" title="<%= camp.desc %>" alt="<%= camp.desc %>">
+      <img src="<%= camp.image %>" class="img-fluid rounded-start fit" title="<%= camp.desc %>" alt="<%= camp.desc %>" style="object-fit: cover;">
     </div>
     <div class="col-md-8">
-      <div class="card-body px-5">
+      <div class="card-body px-3">
         <h5 class="card-title"><%= camp.title %></h5>
-        <p class="card-text"><%= camp.desc %></p>
+        <p class="card-text"><%= camp.desc.substring(0, 180) %>...</p>
         <p class="card-text">$<%= camp.price %></p>
         <p class="card-text"><small class="text-muted"><%= camp.location %></small></p>
-        <a href="/campgrounds/<%= camp._id %>" class='btn btn-primary'>View More</a>
+        <a href="/campgrounds/<%= camp._id %>" class='btn btn-primary btn-sm'>View More</a>
       </div>
     </div>
   </div>

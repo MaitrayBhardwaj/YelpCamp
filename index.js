@@ -81,7 +81,7 @@ app.get('/', (req, res, next) => {
 
 app.get('/campgrounds', wrapAsync(async (req, res, next) => {
 	const data = await Campground.find({})
-	res.render('allCamp', { data, pageTitle: 'All Campgrounds' })
+	res.render('allCamp', { data, pageTitle:'All Campgrounds' })
 }))
 
 app.get('/campgrounds/new', (req, res, next) => {
@@ -93,7 +93,7 @@ app.get('/campgrounds/:id', wrapAsync(async (req, res, next) => {
 	const data = await Campground.findById(id).populate({
 		path: 'reviews',
 		options: { limit: 5 }
-	})
+	}).populate('author')
 	if(!data){
 		req.flash('error', "Couldn't find the campground you are looking for :(")
 		res.redirect('/campgrounds')
@@ -110,7 +110,9 @@ app.get('/campgrounds/:id/edit', isLoggedIn, wrapAsync(async (req, res, next) =>
 }))
 
 app.post('/campgrounds', isLoggedIn, validateCampground, wrapAsync(async (req, res, next) => {
+	const user = req.user
 	const newCamp = new Campground(req.body)
+	newCamp.author = user
 	await newCamp.save()
 	req.flash('success', 'Campground added successfully!')
 	res.redirect(`/campgrounds/${newCamp._id}`)
@@ -134,9 +136,15 @@ app.get('/campgrounds/:id/reviews', wrapAsync(async (req, res, next) => {
 }))
 
 app.patch('/campgrounds/:id', isLoggedIn, validateCampground, wrapAsync(async (req, res, next) => {
-	await Campground.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
-	req.flash('success', 'Campground updated successfully!')
-	res.redirect(`/campgrounds/${req.params.id}`)
+	const target = await Campground.findById(req.params.id)
+	if(target.author._id === req.user._id){
+		await Campground.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+		req.flash('success', 'Campground updated successfully!')
+		return res.redirect(`/campgrounds/${req.params.id}`)
+	}
+	else{
+		req.flash('error', )
+	}
 }))
 
 app.delete('/campgrounds/:id', isLoggedIn, wrapAsync(async (req, res, next) => {
@@ -195,9 +203,9 @@ app.all('*', (req, res, next) => {
 })
 
 app.use((err, req, res, next) => {
-	const status = err.status || 500
+	const status = err.status || 400
 	res.status(status)
-	res.render('error', { err })
+	res.render('error', { err, pageTitle: `Error ${status}` })
 })
 
 app.listen(3000, () => {
