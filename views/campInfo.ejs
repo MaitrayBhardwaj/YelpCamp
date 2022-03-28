@@ -10,10 +10,12 @@
 	    <p class="card-text text-muted"><%= data.location %></p>
 	    <div class="d-flex">
 	    	<a href="/campgrounds/<%= data._id %>/reviews" class="btn btn-sm btn-warning">Reviews</a>
-		    <a href="/campgrounds/<%= data._id %>/edit" class="btn btn-sm btn-success mx-3">Edit Campground</a>
-		    <form action="/campgrounds/<%= data._id %>?_method=DELETE" method="POST">
-		    	<button class="btn btn-sm btn-danger">Delete Campground</button>
-		    </form>
+	    	<% if(user && user._id.equals(data.author._id)) { %>
+			    <a href="/campgrounds/<%= data._id %>/edit" class="btn btn-sm btn-success mx-3">Edit Campground</a>
+			    <form action="/campgrounds/<%= data._id %>?_method=DELETE" method="POST">
+			    	<button class="btn btn-sm btn-danger">Delete Campground</button>
+			    </form>
+		    <% } %>
 		</div>
 		<div class="text-muted mt-5 border-top pt-2 small">Submitted by <%= data.author.username %></div>
 	  </div>
@@ -47,10 +49,13 @@
 		          	<% } %>
 		        </h5>
 		        <p class="card-text"><%= review.review %></p>
+		        <p class="card-text text-muted">Written by <%= review.author.username %></p>
 		        <div class="d-flex">
-		          <form action="/campgrounds/<%= review.parentCamp._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
-		            <button class="btn btn-sm btn-danger">Delete Review</button>
-		          </form>
+		        <% if(user && user._id.equals(review.author._id)) { %>
+			          <form action="/campgrounds/<%= review.parentCamp._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
+			            <button class="btn btn-sm btn-danger">Delete Review</button>
+			          </form>
+			    <% } %>
 		        </div>
 		      </div>
 		  </div>

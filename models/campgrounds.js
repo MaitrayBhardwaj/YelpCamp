@@ -26,7 +26,7 @@ const cmpSchema = new mongoose.Schema({
 	},
 	image: {
 		type: String,
-		default: 'https://source.unsplash.com/collection/483251/800x500'
+		default: 'https://source.unsplash.com/collection/483251/900x600'
 	},
 	reviews: [{
 		type: mongoose.Schema.Types.ObjectId,

@@ -67,6 +67,15 @@ const isLoggedIn = (req, res, next) => {
 	}
 }
 
+const isAuthor = async (req, res, next) => {
+	const camp = await Campground.findById(req.params.id)
+	if(camp.author._id.equals(req.user._id)){
+		return next()
+	}
+	req.flash('error', 'You are not allowed to do that!')
+	res.redirect(`/campgrounds/${req.params.id}`)
+}
+
 app.engine('ejs', ejsMate)
 app.set('views', path.join(__dirname, '/views'))
 app.set('view engine', 'ejs')
@@ -92,6 +101,7 @@ app.get('/campgrounds/:id', wrapAsync(async (req, res, next) => {
 	const id = req.params.id
 	const data = await Campground.findById(id).populate({
 		path: 'reviews',
+		populate: { path: 'author' },
 		options: { limit: 5 }
 	}).populate('author')
 	if(!data){
@@ -106,6 +116,10 @@ app.get('/campgrounds/:id', wrapAsync(async (req, res, next) => {
 app.get('/campgrounds/:id/edit', isLoggedIn, wrapAsync(async (req, res, next) => {
 	const id = req.params.id
 	const data = await Campground.findById(id)
+	if(!data){
+		req.flash('error', 'Campground not found.')
+		return res.redirect(`/campgrounds/${id}`)
+	}
 	res.render('editCamp', { data, pageTitle: `Edit ${data.title}` })
 }))
 
@@ -122,6 +136,7 @@ app.post('/campgrounds/:id', isLoggedIn, validateReview, wrapAsync(async (req, r
 	const newReview = new Review(req.body)
 	const campground = await Campground.findById(req.params.id)
 	newReview.parentCamp = campground
+	newReview.author = req.user
 	await newReview.save()
 	campground.reviews.push(newReview)
 	await campground.save()
@@ -135,19 +150,15 @@ app.get('/campgrounds/:id/reviews', wrapAsync(async (req, res, next) => {
 	res.render('campReviews', { reviews, pageTitle: `Reviews for ${reviews.title}` })
 }))
 
-app.patch('/campgrounds/:id', isLoggedIn, validateCampground, wrapAsync(async (req, res, next) => {
+app.patch('/campgrounds/:id', isLoggedIn, isAuthor, validateCampground, wrapAsync(async (req, res, next) => {
 	const target = await Campground.findById(req.params.id)
-	if(target.author._id === req.user._id){
-		await Campground.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
-		req.flash('success', 'Campground updated successfully!')
-		return res.redirect(`/campgrounds/${req.params.id}`)
-	}
-	else{
-		req.flash('error', )
-	}
+	await Campground.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+	req.flash('success', 'Campground updated successfully!')
+	res.redirect(`/campgrounds/${req.params.id}`)
 }))
 
-app.delete('/campgrounds/:id', isLoggedIn, wrapAsync(async (req, res, next) => {
+app.delete('/campgrounds/:id', isLoggedIn, isAuthor, wrapAsync(async (req, res, next) => {
+	const target = await Campground.findById(req.params.id)
 	await Campground.findByIdAndDelete(req.params.id)
 	req.flash('success', 'Campground deleted successfully!')
 	res.redirect('/campgrounds')

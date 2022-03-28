@@ -1,7 +1,7 @@
 <% layout("layouts/boilerplate.ejs")%>
 <div class="d-flex justify-content-center align-items-center">
 	<div class="d-flex flex-column border p-5 mb-5" style="width: 50%;">
-		<h1 class="align-self-center">Add a Campground</h1>
+		<h1 class="align-self-center mb-5">Add a Campground</h1>
 		<form action="/campgrounds" class="d-flex flex-column justify-content-evenly needs-validation" method="POST" novalidate>
 			<input class="form-control mt-3 p-2" type="text" name="title" placeholder="Campground Name" required>
 			<div class="input-group mt-3">
@@ -12,7 +12,7 @@
 			<input class="form-control mt-3 p-2" type="text" name="location" placeholder="Campground Location" required>
 			<div class="d-flex mt-3">
 				<button class="btn btn-success">Submit</button>
-				<a href="/campgrounds/" class="btn btn-primary mx-3">Cancel</a>
+				<a href="/campgrounds/" class="btn btn-primary mx-2">Cancel</a>
 			</div>
 		</form>
 	</div>
