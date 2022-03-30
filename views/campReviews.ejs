@@ -1,18 +1,21 @@
 <% layout("layouts/boilerplate.ejs") %>
 
 <h1 class="mb-4">Reviews</h1>
+<% if(reviews.length === 0) { %>
+    <div class="alert alert-secondary text-center my-2 p-1" role="alert">
+      No reviews yet.
+    </div>
+<% } %>
 <% for(let review of reviews) { %>
 <div class="card mb-3" style="max-width: 100%;">
   <div class="row g-0">
     <div class="col-md-8">
       <div class="card-body px-4">
-        <h5 class="card-title">Camp Review</h5>
+        <h5 class="card-title text-warning fw-bolder fs-4">
+          <p class="starability-result" data-rating="<%= review.rating %>"></p>
+        </h5>
         <p class="card-text"><%= review.review %></p>
-        <p class="card-text">
-          <% for(let i = 0; i < review.rating; i++) { %>
-          &#9733; 
-          <% } %>
-        </p>
+        <p class="card-text text-muted">Written by <%= review.author.username %></p>
         <div class="d-flex">
           <a href="/campgrounds/<%= review.parentCamp._id %>" class='btn btn-primary'>Go to Camp</a>
           <form action="/campgrounds/<%= review.parentCamp._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">

@@ -113,7 +113,7 @@ app.get('/campgrounds/:id', wrapAsync(async (req, res, next) => {
 	}
 }))
 
-app.get('/campgrounds/:id/edit', isLoggedIn, wrapAsync(async (req, res, next) => {
+app.get('/campgrounds/:id/edit', isLoggedIn, isAuthor, wrapAsync(async (req, res, next) => {
 	const id = req.params.id
 	const data = await Campground.findById(id)
 	if(!data){
@@ -145,9 +145,11 @@ app.post('/campgrounds/:id', isLoggedIn, validateReview, wrapAsync(async (req, r
 }))
 
 app.get('/campgrounds/:id/reviews', wrapAsync(async (req, res, next) => {
-	const { reviews } = await Campground.findById(req.params.id).populate('reviews')
-	console.dir(reviews)
-	res.render('campReviews', { reviews, pageTitle: `Reviews for ${reviews.title}` })
+	const reviews = await Campground.findById(req.params.id).populate({
+		path: 'reviews',
+		populate: { path: 'author' }
+	})
+	res.render('campReviews', { reviews: reviews.reviews, pageTitle: `Reviews for ${reviews.title}` })
 }))
 
 app.patch('/campgrounds/:id', isLoggedIn, isAuthor, validateCampground, wrapAsync(async (req, res, next) => {
@@ -165,8 +167,14 @@ app.delete('/campgrounds/:id', isLoggedIn, isAuthor, wrapAsync(async (req, res, 
 }))
 
 app.delete('/campgrounds/:campId/reviews/:id', isLoggedIn, wrapAsync(async (req, res, next) => {
-	await Review.findByIdAndDelete(req.params.id)
-	req.flash('success', 'Review deleted successfully!')
+	const rev = await Review.findById(req.params.id)
+	if(rev.author._id.equals(req.user._id)){
+		await rev.remove()
+		req.flash('success', 'Review deleted successfully!')
+	}
+	else{
+		req.flash('error', `You don't have the permission to do that.`)
+	}
 	res.redirect(`/campgrounds/${req.params.campId}`)
 }))
 
