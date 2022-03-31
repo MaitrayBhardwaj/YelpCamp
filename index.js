@@ -1,4 +1,6 @@
-require('dotenv').config()
+if(process.env.NODE_ENV !== 'production'){
+	require('dotenv').config()
+}
 
 const express = require('express')
 const mongoose = require('mongoose')
@@ -9,6 +11,8 @@ const session = require('express-session')
 const flash = require('connect-flash')
 const passport = require('passport')
 const passportLocal = require('passport-local')
+const multer = require('multer')
+const upload = multer({ dest: 'uploads/' })
 
 const Campground = require('./models/campgrounds')
 const Review = require('./models/reviews')
@@ -123,14 +127,20 @@ app.get('/campgrounds/:id/edit', isLoggedIn, isAuthor, wrapAsync(async (req, res
 	res.render('editCamp', { data, pageTitle: `Edit ${data.title}` })
 }))
 
-app.post('/campgrounds', isLoggedIn, validateCampground, wrapAsync(async (req, res, next) => {
-	const user = req.user
-	const newCamp = new Campground(req.body)
-	newCamp.author = user
-	await newCamp.save()
-	req.flash('success', 'Campground added successfully!')
-	res.redirect(`/campgrounds/${newCamp._id}`)
-}))
+// app.post('/campgrounds', isLoggedIn, validateCampground, wrapAsync(async (req, res, next) => {
+// 	const user = req.user
+// 	const newCamp = new Campground(req.body)
+// 	newCamp.author = user
+// 	await newCamp.save()
+// 	req.flash('success', 'Campground added successfully!')
+// 	res.redirect(`/campgrounds/${newCamp._id}`)
+// }))
+
+// app.post('/campgrounds', upload.single('image'), (req, res) => {
+// 	console.dir(req.body)
+// 	console.dir(req.file)
+// 	res.redirect(`/campgrounds`)
+// })
 
 app.post('/campgrounds/:id', isLoggedIn, validateReview, wrapAsync(async (req, res, next) => {
 	const newReview = new Review(req.body)
