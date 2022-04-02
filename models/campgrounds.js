@@ -24,10 +24,16 @@ const cmpSchema = new mongoose.Schema({
 		required: true,
 		maxLength: 30,
 	},
-	image: {
-		type: String,
-		default: 'https://source.unsplash.com/collection/483251/900x600'
-	},
+	image: [{
+		url: {
+			type: String,
+			required: true
+		},
+		filename: {
+			type: String,
+			required: true
+		}
+	}],
 	reviews: [{
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'Review'

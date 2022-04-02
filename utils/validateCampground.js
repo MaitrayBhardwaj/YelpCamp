@@ -7,6 +7,12 @@ const validateCampground = (req, res, next) => {
 		desc: Joi.string().max(1000).min(10).required(),
 		location: Joi.string().max(30).required(),
 		price: Joi.number().min(0).required()
+		// image: Joi.array().items(
+		// 	Joi.object({
+		// 		url: Joi.string().required(),
+		// 		filename: Joi.string().required()
+		// 	})
+		// )
 	})
 
 	const { error } = campgroundSchema.validate(req.body)
