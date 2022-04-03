@@ -73,7 +73,7 @@ const isLoggedIn = (req, res, next) => {
 }
 
 const isAuthor = async (req, res, next) => {
-	const camp = await Campground.findById(req.params.id)
+	const camp = await Campground.findById(req.params.id).select('author')
 	if(camp.author._id.equals(req.user._id)){
 		return next()
 	}
@@ -94,7 +94,7 @@ app.get('/', (req, res, next) => {
 })
 
 app.get('/campgrounds', wrapAsync(async (req, res, next) => {
-	const data = await Campground.find({})
+	const data = await Campground.find({}).select('-reviews -author')
 	res.render('allCamp', { data, pageTitle:'All Campgrounds' })
 }))
 
@@ -120,7 +120,7 @@ app.get('/campgrounds/:id', wrapAsync(async (req, res, next) => {
 
 app.get('/campgrounds/:id/edit', isLoggedIn, isAuthor, wrapAsync(async (req, res, next) => {
 	const id = req.params.id
-	const data = await Campground.findById(id)
+	const data = await Campground.findById(id).select('-reviews -author').lean()
 	if(!data){
 		req.flash('error', 'Campground not found.')
 		return res.redirect(`/campgrounds/${id}`)
@@ -160,26 +160,24 @@ app.get('/campgrounds/:id/reviews', wrapAsync(async (req, res, next) => {
 	const reviews = await Campground.findById(req.params.id).populate({
 		path: 'reviews',
 		populate: { path: 'author' }
-	})
+	}).select('title reviews')
 	res.render('campReviews', { reviews: reviews.reviews, pageTitle: `Reviews for ${reviews.title}` })
 }))
 
 app.patch('/campgrounds/:id', isLoggedIn, isAuthor, validateCampground, wrapAsync(async (req, res, next) => {
-	const target = await Campground.findById(req.params.id)
 	await Campground.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
 	req.flash('success', 'Campground updated successfully!')
 	res.redirect(`/campgrounds/${req.params.id}`)
 }))
 
 app.delete('/campgrounds/:id', isLoggedIn, isAuthor, wrapAsync(async (req, res, next) => {
-	const target = await Campground.findById(req.params.id)
 	await Campground.findByIdAndDelete(req.params.id)
 	req.flash('success', 'Campground deleted successfully!')
 	res.redirect('/campgrounds')
 }))
 
 app.delete('/campgrounds/:campId/reviews/:id', isLoggedIn, wrapAsync(async (req, res, next) => {
-	const rev = await Review.findById(req.params.id)
+	const rev = await Review.findById(req.params.id).select('author')
 	if(rev.author._id.equals(req.user._id)){
 		await rev.remove()
 		req.flash('success', 'Review deleted successfully!')
