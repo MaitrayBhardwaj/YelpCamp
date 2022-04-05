@@ -1,5 +1,17 @@
 const mongoose = require('mongoose')
 const Review = require('./reviews')
+const { cloudinary } = require('../cloudinary')
+
+const imgSchema = new mongoose.Schema({
+	url: {
+		type: String,
+		required: true
+	},
+	filename: {
+		type: String,
+		required: true
+	}
+})
 
 const cmpSchema = new mongoose.Schema({
 	title: {
@@ -24,16 +36,7 @@ const cmpSchema = new mongoose.Schema({
 		required: true,
 		maxLength: 30,
 	},
-	image: [{
-		url: {
-			type: String,
-			required: true
-		},
-		filename: {
-			type: String,
-			required: true
-		}
-	}],
+	image: [ imgSchema ],
 	reviews: [{
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'Review'
@@ -44,10 +47,15 @@ const cmpSchema = new mongoose.Schema({
 	}
 })
 
-cmpSchema.post('findOneAndDelete', async (data) => {
-	for(let review of data.reviews){
-		await Review.findByIdAndDelete(review._id)
+const delImgs = async (camp) => {
+	for(let image of camp.image){
+		await cloudinary.uploader.destroy(image.filename)
 	}
+}
+
+cmpSchema.post('findOneAndDelete', async (data) => {
+	console.log(data)
+	await Promise.all([Review.deleteMany({_id: { $in: data.reviews } }), delImgs(data)])
 })
 
 module.exports = mongoose.model('Campground', cmpSchema)

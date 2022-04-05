@@ -6,7 +6,8 @@ const validateCampground = (req, res, next) => {
 		title: Joi.string().max(30).min(2).required(),
 		desc: Joi.string().max(1000).min(10).required(),
 		location: Joi.string().max(30).required(),
-		price: Joi.number().min(0).required()
+		price: Joi.number().min(0).required(),
+		deleteImg: Joi.array()
 		// image: Joi.array().items(
 		// 	Joi.object({
 		// 		url: Joi.string().required(),

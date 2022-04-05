@@ -10,7 +10,19 @@
 			</div>
 			<input class="form-control mt-3 p-2" type="text" name="desc" placeholder="Campground Description" value="<%= data.desc %>">
 			<input class="form-control mt-3 p-2" type="text" name="location" placeholder="Campground Location" value="<%= data.location %>">
-			<input type="file" name="image" class="mt-3" multiple>
+			<div class="mt-3">
+			  <input class="form-control custom-file" name="image" type="file" id="formFileMultiple" multiple>
+			</div>
+			<div class="mt-3">
+				<% data.image.forEach((img, i) => { %>
+				<div class="mt-3 d-block">
+					<input type="checkbox" name="deleteImg[]" id="img-<%= i %>" value="<%= img.filename %>">
+					<label for="img-<%= i %>">Delete?</label>
+				</div>
+					<% img.thumb =  img.url.replace('/upload', '/upload/w_300') %>
+					<img src="<%= img.thumb %>" class="img-thumbnail">
+				<% }) %>
+			</div>
 			<div class="d-flex mt-3">
 				<button class="btn btn-success">Update</button>
 				<a href="/campgrounds/<%= data._id %>" class="btn btn-primary mx-3">Cancel</a>

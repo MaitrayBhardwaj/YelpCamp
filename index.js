@@ -24,6 +24,7 @@ const expressError = require('./utils/expressError')
 const validateCampground = require('./utils/validateCampground')
 const validateReview = require('./utils/validateReview')
 const validateUser = require('./utils/validateUser')
+const { cloudinary } = require('./cloudinary')
 
 mongoose.connect('mongodb://localhost:27017/YelpCamp')
 	.then(res => {
@@ -90,7 +91,7 @@ passport.serializeUser(User.serializeUser())
 passport.deserializeUser(User.deserializeUser())
 
 app.get('/', (req, res, next) => {
-	res.send('Working!')
+	res.render('home')
 })
 
 app.get('/campgrounds', wrapAsync(async (req, res, next) => {
@@ -138,12 +139,6 @@ app.post('/campgrounds', isLoggedIn, upload.array('image'), validateCampground, 
 	res.redirect(`/campgrounds/${newCamp._id}`)
 }))
 
-// app.post('/campgrounds', upload.single('image'), (req, res) => {
-// 	console.dir(req.body)
-// 	console.dir(req.file)
-// 	res.redirect(`/campgrounds`)
-// })
-
 app.post('/campgrounds/:id', isLoggedIn, validateReview, wrapAsync(async (req, res, next) => {
 	const newReview = new Review(req.body)
 	const campground = await Campground.findById(req.params.id)
@@ -164,8 +159,20 @@ app.get('/campgrounds/:id/reviews', wrapAsync(async (req, res, next) => {
 	res.render('campReviews', { reviews: reviews.reviews, pageTitle: `Reviews for ${reviews.title}` })
 }))
 
-app.patch('/campgrounds/:id', isLoggedIn, isAuthor, validateCampground, wrapAsync(async (req, res, next) => {
-	await Campground.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+app.patch('/campgrounds/:id', isLoggedIn, isAuthor, upload.array('image'), validateCampground, wrapAsync(async (req, res, next) => {
+	let camp = await Campground.findById(req.params.id)
+	camp.title = req.body.title
+	camp.price = req.body.price
+	camp.desc = req.body.desc
+	camp.location = req.body.location
+	camp.image.push(...req.files.map(file => ({ url: file.path, filename: file.filename })))
+	await camp.save()
+	if(req.body.deleteImg && req.body.deleteImg.length !== 0){
+		for(let filename of req.body.deleteImg){
+			await cloudinary.uploader.destroy(filename)
+		}
+		await camp.updateOne({ $pull: { image: { filename: { $in: req.body.deleteImg }}}})
+	}
 	req.flash('success', 'Campground updated successfully!')
 	res.redirect(`/campgrounds/${req.params.id}`)
 }))
