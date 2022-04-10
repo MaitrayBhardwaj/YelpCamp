@@ -1,0 +1,42 @@
+body{
+	height: 100vh;
+	background-image: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('../images/homebg.jpg');
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	text-shadow: 0 0 0 0 0.5;
+}
+
+.cover-container{
+	max-width: 80vw;
+}
+
+
+.nav-link{
+	margin: 0.5em;
+	color: rgba(255, 255, 255, 0.5);
+	transition: border-bottom-color 0.1s color 0.1s;
+	padding: 0.5em 0;
+	border-bottom: 2px solid transparent;
+}
+
+.active{
+	color: white;
+	border-bottom-color: white;
+}
+
+.nav-link:hover{
+	color: white;
+	border-bottom-color: white;
+}
+
+p.lead{
+	font-size: 1em;
+	margin-bottom: 2em;
+}
+
+.btn-secondary, .btn-secondary:hover{
+	background-color: white;
+	color: #191919 !important;
+	font-weight: 700;
+}

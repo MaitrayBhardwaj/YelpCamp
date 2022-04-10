@@ -14,6 +14,9 @@ const passportLocal = require('passport-local')
 const multer = require('multer')
 const { storage } = require('./cloudinary/index')
 const upload = multer({ storage })
+const helmet = require('helmet')
+const mongoSanitize = require('express-mongo-sanitize')
+const mongoStore = require('connect-mongo')
 
 const Campground = require('./models/campgrounds')
 const Review = require('./models/reviews')
@@ -36,6 +39,16 @@ mongoose.connect('mongodb://localhost:27017/YelpCamp')
 
 const app = express()
 
+const store = mongoStore.create({
+	mongoUrl: 'mongodb://localhost:27017/YelpCamp',
+	secret: process.env.sessionSecret,
+	touchAfter: 24 * 3600
+})
+
+store.on('error', (err) => {
+	console.log('Session error', err)
+})
+
 app.use(methodOverride('_method'))
 app.use(express.static(path.join(__dirname, '/public')))
 app.use(express.urlencoded({ extended: true }))
@@ -44,6 +57,7 @@ app.use(session({
 	secret: process.env.sessionSecret,
 	resave: false,
 	saveUninitialized: true,
+	store,
 	cookie: {
 		httpOnly: true,
 		expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
@@ -51,6 +65,8 @@ app.use(session({
 	}
 }))
 
+app.use(helmet({ contentSecurityPolicy: false }))
+app.use(mongoSanitize())
 app.use(passport.initialize())
 app.use(passport.session())
 app.use((req, res, next) => {
